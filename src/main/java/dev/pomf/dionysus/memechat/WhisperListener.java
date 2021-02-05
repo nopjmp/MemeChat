@@ -11,19 +11,16 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.BiFunction;
 
 public final class WhisperListener implements Listener {
+    private final StringBuilder stringBuilder = new StringBuilder();
+    private final Map<UUID, PlayerData> playerDataMap = new HashMap<>();
     private String delimiterSend;
     private String delimiterReceive;
-    private final StringBuilder stringBuilder = new StringBuilder();
-
-    private final Map<UUID, PlayerData> playerDataMap = new HashMap<>();
-
     private final Map<String, BiFunction<PlayerData, String[], Boolean>> commands = ImmutableMap.of(
             "/reply", (senderData, args) -> {
                 Player sender = senderData.getPlayer();
@@ -87,7 +84,7 @@ public final class WhisperListener implements Listener {
                 sender.sendMessage(ChatColor.RED + "This command can only be run by a player.");
                 return true;
             }
-            Player player = (Player)sender;
+            Player player = (Player) sender;
             PlayerData playerData = playerDataMap.computeIfAbsent(player.getUniqueId(), k -> new PlayerData(player));
             boolean success = commands.get(cmd).apply(playerData, args);
             if (!success) {
