@@ -1,6 +1,8 @@
 package dev.pomf.dionysus.memechat;
 
 import org.bukkit.ChatColor;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -17,6 +19,9 @@ import java.util.stream.Collectors;
 public final class MemeChat extends JavaPlugin implements Listener {
     public static final String WHISPER_ACTIVE = "whispers.active";
     public static final String WHISPER_MONITORING = "whispers.monitoring";
+    public static final String WHISPER_COLOR = "whispers.color";
+    public static final String WHISPER_DELIMITER_SEND = "whispers.delimiter.send";
+    public static final String WHISPER_DELIMITER_RECEIVE = "whispers.separator.receive";
 
     public static final String COLORIZE_NAMES = "colorize-names";
 
@@ -28,10 +33,23 @@ public final class MemeChat extends JavaPlugin implements Listener {
                     .collect(Collectors.toMap(c -> CHAT_PREFIX + c.name().toLowerCase(), c -> c))
     );
 
+    private final WhisperListener whisperListener = new WhisperListener(this);
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (getConfig().getBoolean(WHISPER_ACTIVE, true)) {
+            return whisperListener.onCommand(sender, command, label, args);
+        }
+        return false;
+    }
+
     @Override
     public void onEnable() {
         getConfig().addDefault(WHISPER_ACTIVE, true);
         getConfig().addDefault(WHISPER_MONITORING, true);
+        getConfig().addDefault(WHISPER_COLOR, "light_purple");
+        getConfig().addDefault(WHISPER_DELIMITER_SEND, ChatColor.ITALIC + " -> ");
+        getConfig().addDefault(WHISPER_DELIMITER_RECEIVE, ChatColor.ITALIC + " <- ");
         getConfig().addDefault(COLORIZE_NAMES, true);
         getConfig().addDefault(CHAT_PREFIX + "dark_green", ">");
 
@@ -40,6 +58,7 @@ public final class MemeChat extends JavaPlugin implements Listener {
 
         this.getLogger().log(Level.INFO, "registering events");
         getServer().getPluginManager().registerEvents(this, this);
+        getServer().getPluginManager().registerEvents(whisperListener, this);
     }
 
     @Override

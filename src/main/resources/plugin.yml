@@ -4,3 +4,11 @@ main: dev.pomf.dionysus.memechat.MemeChat
 prefix: MemeChat
 load: STARTUP
 authors: [ nopjmp ]
+commands:
+  reply:
+    description: Reply to a received message.
+    usage: /<command> message
+    aliases: [r]
+  msg:
+    description: Send a message to a player.
+    usage: /<command> [player] message
