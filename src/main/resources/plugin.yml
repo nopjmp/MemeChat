@@ -1,0 +1,6 @@
+name: MemeChat
+version: ${project.version}
+main: dev.pomf.dionysus.memechat.MemeChat
+prefix: MemeChat
+load: STARTUP
+authors: [ nopjmp ]
