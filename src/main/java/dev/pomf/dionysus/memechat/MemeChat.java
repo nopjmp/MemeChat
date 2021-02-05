@@ -18,6 +18,8 @@ public final class MemeChat extends JavaPlugin implements Listener {
     public static final String WHISPER_ACTIVE = "whispers.active";
     public static final String WHISPER_MONITORING = "whispers.monitoring";
 
+    public static final String COLORIZE_NAMES = "colorize-names";
+
     public static final String CHAT_PREFIX = "prefix.";
 
     public static final Map<String, ChatColor> CHAT_PREFIXES = Collections.unmodifiableMap(
@@ -30,6 +32,7 @@ public final class MemeChat extends JavaPlugin implements Listener {
     public void onEnable() {
         getConfig().addDefault(WHISPER_ACTIVE, true);
         getConfig().addDefault(WHISPER_MONITORING, true);
+        getConfig().addDefault(COLORIZE_NAMES, true);
         getConfig().addDefault(CHAT_PREFIX + "dark_green", ">");
 
         getConfig().options().copyDefaults(true);
@@ -42,6 +45,24 @@ public final class MemeChat extends JavaPlugin implements Listener {
     @Override
     public void onDisable() {
         // Plugin shutdown logic
+    }
+
+    // XorShift to shuffle the UUID around to get a color
+    public String colorizeNameFormat(Player player) {
+        long x = player.getUniqueId().getLeastSignificantBits();
+        x ^= x << 13;
+        x ^= x >> 7;
+        x ^= x << 17;
+
+        x ^= player.getUniqueId().getMostSignificantBits();
+        x ^= x << 13;
+        x ^= x >> 7;
+        x ^= x << 17;
+
+        ChatColor playerColor = ChatColor.values()[(int) (x % 16)];
+
+        // private String format = "<%1$s> %2$s";
+        return "<" + playerColor + "%1$s" + ChatColor.RESET + "> %2$s";
     }
 
     public String colorizeChatMessage(String msg) {
@@ -61,6 +82,9 @@ public final class MemeChat extends JavaPlugin implements Listener {
             return;
 
         String msg = colorizeChatMessage(event.getMessage());
+        if (getConfig().getBoolean(COLORIZE_NAMES, false)) {
+            event.setFormat(colorizeNameFormat(event.getPlayer()));
+        }
         event.setMessage(msg);
     }
 }
