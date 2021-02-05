@@ -8,7 +8,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 public final class MemeChat extends JavaPlugin implements Listener {
     public static final String WHISPER_ACTIVE = "whispers.active";
@@ -16,17 +20,22 @@ public final class MemeChat extends JavaPlugin implements Listener {
 
     public static final String CHAT_PREFIX = "prefix.";
 
-    public static final String[] CHAT_PREFIXES = new String[] { "green" };
+    public static final Map<String, ChatColor> CHAT_PREFIXES = Collections.unmodifiableMap(
+            Arrays.stream(ChatColor.values())
+                    .filter(c -> !c.isFormat() && c != ChatColor.RESET)
+                    .collect(Collectors.toMap(c -> CHAT_PREFIX + c.name().toLowerCase(), c -> c))
+    );
 
     @Override
     public void onEnable() {
         getConfig().addDefault(WHISPER_ACTIVE, true);
         getConfig().addDefault(WHISPER_MONITORING, true);
-        getConfig().addDefault(CHAT_PREFIX + "green", ">");
+        getConfig().addDefault(CHAT_PREFIX + "dark_green", ">");
 
         getConfig().options().copyDefaults(true);
         saveConfig();
 
+        this.getLogger().log(Level.INFO, "registering events");
         getServer().getPluginManager().registerEvents(this, this);
     }
 
@@ -36,11 +45,10 @@ public final class MemeChat extends JavaPlugin implements Listener {
     }
 
     public String colorizeChatMessage(String msg) {
-        for (String prefixColor : CHAT_PREFIXES) {
-            String prefix = getConfig().getString(CHAT_PREFIX + prefixColor);
+        for (Map.Entry<String, ChatColor> prefixColor : CHAT_PREFIXES.entrySet()) {
+            String prefix = getConfig().getString(prefixColor.getKey(), "");
             if (!prefix.isEmpty() && msg.startsWith(prefix)) {
-                ChatColor color = ChatColor.valueOf(prefixColor.toUpperCase());
-                return color + msg;
+                return prefixColor.getValue() + msg;
             }
         }
 
@@ -54,12 +62,5 @@ public final class MemeChat extends JavaPlugin implements Listener {
 
         String msg = colorizeChatMessage(event.getMessage());
         event.setMessage(msg);
-    }
-
-    private void readConfig() {
-        FileConfiguration config = this.getConfig();
-
-        saveDefaultConfig();
-        saveConfig();
     }
 }
