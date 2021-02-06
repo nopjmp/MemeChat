@@ -39,8 +39,8 @@ public final class MemeChat extends JavaPlugin implements Listener {
         getConfig().addDefault(WHISPER_ACTIVE, true);
         getConfig().addDefault(WHISPER_MONITORING, true);
         getConfig().addDefault(WHISPER_COLOR, "light_purple");
-        getConfig().addDefault(WHISPER_DELIMITER_SEND, ChatColor.ITALIC + " -> ");
-        getConfig().addDefault(WHISPER_DELIMITER_RECEIVE, ChatColor.ITALIC + " <- ");
+        getConfig().addDefault(WHISPER_DELIMITER_SEND, " -> ");
+        getConfig().addDefault(WHISPER_DELIMITER_RECEIVE, " <- ");
         getConfig().addDefault(COLORIZE_NAMES, true);
         getConfig().addDefault(CHAT_PREFIX + "dark_green", ">");
 
