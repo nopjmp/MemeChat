@@ -21,6 +21,11 @@ public final class WhisperListener implements Listener {
     private final Map<UUID, PlayerData> playerDataMap = new HashMap<>();
     private String delimiterSend;
     private String delimiterReceive;
+    private final Map<String, String> usageMap = ImmutableMap.of(
+            "/reply", "/reply message",
+            "/msg", "/msg [player] message"
+    );
+
     private final Map<String, BiFunction<PlayerData, String[], Boolean>> commands = ImmutableMap.of(
             "/reply", (senderData, args) -> {
                 Player sender = senderData.getPlayer();
@@ -67,6 +72,11 @@ public final class WhisperListener implements Listener {
             }
     );
 
+    private final Map<String, String> aliasMap = ImmutableMap.of(
+            "/r", "/reply",
+            "/m", "/msg"
+    );
+
     public WhisperListener(MemeChat plugin) {
         delimiterSend = plugin.getConfig().getString(MemeChat.WHISPER_DELIMITER_SEND, " -> ");
         delimiterReceive = plugin.getConfig().getString(MemeChat.WHISPER_DELIMITER_RECEIVE, " <- ");
@@ -74,24 +84,24 @@ public final class WhisperListener implements Listener {
 
     @EventHandler
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
+        final Player sender = event.getPlayer();
+        String command = event.getMessage();
+        int spaceIndexOf = command.indexOf(' ');
+        if (spaceIndexOf != -1) {
+            command = command.substring(0, spaceIndexOf);
+        }
 
-    }
+        command = aliasMap.getOrDefault(command, command);
+        if (commands.containsKey(command)) {
+            event.setCancelled(true);
 
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        final String cmd = command.getName().toLowerCase();
-        if (commands.containsKey(cmd)) {
-            if (!(sender instanceof Player)) {
-                sender.sendMessage(ChatColor.RED + "This command can only be run by a player.");
-                return true;
-            }
-            Player player = (Player) sender;
-            PlayerData playerData = playerDataMap.computeIfAbsent(player.getUniqueId(), k -> new PlayerData(player));
-            boolean success = commands.get(cmd).apply(playerData, args);
+            String[] args = event.getMessage().substring(command.length() + 1).split(" ");
+            PlayerData playerData = playerDataMap.computeIfAbsent(sender.getUniqueId(), k -> new PlayerData(sender));
+            boolean success = commands.get(command).apply(playerData, args);
             if (!success) {
-                sender.sendMessage(ChatColor.RED + command.getUsage());
+                sender.sendMessage(ChatColor.RED + aliasMap.getOrDefault(command, command + ": unable to find usage information...."));
             }
         }
-        return true;
     }
 
     @EventHandler

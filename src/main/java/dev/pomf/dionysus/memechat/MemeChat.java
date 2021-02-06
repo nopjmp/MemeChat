@@ -35,14 +35,6 @@ public final class MemeChat extends JavaPlugin implements Listener {
     private final WhisperListener whisperListener = new WhisperListener(this);
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (getConfig().getBoolean(WHISPER_ACTIVE, true)) {
-            return whisperListener.onCommand(sender, command, label, args);
-        }
-        return false;
-    }
-
-    @Override
     public void onEnable() {
         getConfig().addDefault(WHISPER_ACTIVE, true);
         getConfig().addDefault(WHISPER_MONITORING, true);
