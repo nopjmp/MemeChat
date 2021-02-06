@@ -98,7 +98,7 @@ public final class WhisperListener implements Listener {
         int spaceIndexOf = command.indexOf(' ');
         if (spaceIndexOf != -1) {
             command = command.substring(0, spaceIndexOf);
-            arguments = arguments.substring(spaceIndexOf);
+            arguments = arguments.substring(spaceIndexOf + 1);
         } else {
             // we don't have any arguments
             arguments = "";
