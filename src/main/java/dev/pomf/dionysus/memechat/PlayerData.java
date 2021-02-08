@@ -9,10 +9,17 @@ import java.util.UUID;
 public final class PlayerData {
     private final Player player;
     private UUID lastReplied;
+    private UUID lastSent;
 
     public PlayerData(@Nonnull Player player) {
         this.player = player;
         this.lastReplied = null;
+        this.lastSent = null;
+    }
+
+    @Nonnull
+    public Player getPlayer() {
+        return player;
     }
 
     public Player getLastReplied() {
@@ -25,8 +32,13 @@ public final class PlayerData {
         this.lastReplied = lastReplied;
     }
 
-    @Nonnull
-    public Player getPlayer() {
-        return player;
+    public Player getLastSent() {
+        if (lastSent != null)
+            return Bukkit.getPlayer(lastSent);
+        return null;
+    }
+
+    public void setLastSent(UUID lastSent) {
+        this.lastSent = lastSent;
     }
 }

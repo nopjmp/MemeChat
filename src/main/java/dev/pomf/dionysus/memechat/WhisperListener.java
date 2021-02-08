@@ -24,7 +24,8 @@ public final class WhisperListener implements Listener {
     private ChatColor chatColor;
     private final Map<String, String> usageMap = ImmutableMap.of(
             "/reply", "/reply message",
-            "/msg", "/msg [player] message"
+            "/msg", "/msg [player] message",
+            "/msglast", "/msglast message"
     );
 
     private final Map<String, BiFunction<PlayerData, String[], Boolean>> commands = ImmutableMap.of(
@@ -76,12 +77,38 @@ public final class WhisperListener implements Listener {
                     sender.sendMessage(ChatColor.RED + "Could not find player: " + args[0]);
                 }
                 return true;
+            },
+            "/msglast", (senderData, args) -> {
+                Player sender = senderData.getPlayer();
+                Player rcpt = senderData.getLastSent();
+                if (rcpt != null) {
+                    if (sender.getUniqueId().equals(rcpt.getUniqueId())) {
+                        sender.sendMessage(ChatColor.RED + "You cannot send a private message to yourself.");
+                    }
+                    stringBuilder.delete(0, stringBuilder.length());
+                    for (String s : args) {
+                        stringBuilder.append(s);
+                    }
+                    String message = stringBuilder.toString();
+                    PlayerData rcptData = playerDataMap.computeIfAbsent(rcpt.getUniqueId(), k -> new PlayerData(rcpt));
+
+                    rcpt.sendMessage(chatColor + sender.getName() + delimiterReceive + message);
+                    rcptData.setLastReplied(rcpt.getUniqueId());
+
+                    sender.sendMessage(chatColor + rcpt.getName() + delimiterSend + message);
+                } else {
+                    sender.sendMessage(ChatColor.RED + "You have not sent any messages this session.");
+                }
+                return true;
             }
     );
 
     private final Map<String, String> aliasMap = ImmutableMap.of(
             "/r", "/reply",
-            "/m", "/msg"
+            "/m", "/msg",
+            "/w", "/msg",
+            "/l", "/msglast",
+            "/tell", "/msg"
     );
 
     public WhisperListener(MemeChat plugin) {
